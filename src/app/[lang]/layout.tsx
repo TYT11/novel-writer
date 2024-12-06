@@ -1,6 +1,6 @@
 import React from "react";
 import { setI18n } from "@lingui/react/server";
-import { t } from "@lingui/macro";
+import { useLingui } from "@lingui/react/macro";
 import { LinguiClientProvider } from "@/components/i18n/LinguiClientProvider";
 import { allMessages, getI18nInstance } from "@/lib/i18n/appRouterI18n";
 import { PageLangParam, withLinguiLayout } from "@/lib/i18n/withLingui";
@@ -15,9 +15,10 @@ export async function generateMetadata({ params }: PageLangParam) {
   const { lang } = await params;
   const i18n = getI18nInstance(lang);
   setI18n(i18n);
+  const { t } = useLingui();
 
   return {
-    title: t(i18n)`editor`,
+    title: t`editor`,
   };
 }
 
@@ -29,7 +30,7 @@ export default withLinguiLayout(async function RootLayout({
   return (
     <html lang={lang}>
       <body className="bg-background text-foreground">
-        <main className="min-h-screen flex flex-col">
+        <main className="h-screen flex flex-col">
           <LinguiClientProvider
             initialLocale={lang}
             initialMessages={allMessages[lang]!}

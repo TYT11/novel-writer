@@ -13,6 +13,14 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/app/[lang]/layout.tsx:20
+#: src/app/[lang]/page.tsx:14
+msgid "Check out how the editor looks like for now <0>here</0>!"
+msgstr ""
+
+#: src/app/[lang]/layout.tsx:21
 msgid "editor"
+msgstr ""
+
+#: src/app/[lang]/page.tsx:11
+msgid "This site is still under construction 🚧🚧🚧"
 msgstr ""
