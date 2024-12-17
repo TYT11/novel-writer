@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -13,9 +13,11 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  role          String?
+  role          SystemRole @default(USER)
   accounts      Account[]
   sessions      Session[]
+  projects      Novel[]
+  collaborations Collaboration[] // on novels or chapters
 }
 
 model Account {
@@ -57,4 +59,45 @@ model VerificationToken {
   expires    DateTime
  
   @@unique([identifier, token])
+}
+
+model Novel {
+  id            String         @id @default(cuid())
+  name          String
+  description   String?
+  creatorId     String
+  creator       User           @relation(fields: [creatorId], references: [id])
+  chapters      Chapter[]
+  collaborations Collaboration[] // Collaboration can be on the entire novel
+}
+
+model Chapter {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  projectId   String
+  novel     Novel @relation(fields: [projectId], references: [id])
+  collaborations Collaboration[] // Collaboration can be on specific chapters
+}
+
+model Collaboration {
+  id          String   @id @default(cuid())
+  userId      String
+  projectId   String?  // If collaboration is on a novel
+  chapterId   String?  // If collaboration is on a specific chapter
+  role        NovelRole @default(VIEWER)
+  user        User     @relation(fields: [userId], references: [id])
+  novel     Novel? @relation(fields: [projectId], references: [id])
+  chapter     Chapter? @relation(fields: [chapterId], references: [id])
+}
+
+enum NovelRole {
+  CREATOR
+  EDITOR
+  VIEWER
+}
+
+enum SystemRole {
+  ADMIN
+  USER
 }
