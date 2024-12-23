@@ -20,24 +20,38 @@ export const config = {
   ],
 };
 export default auth((req) => {
-  const { nextUrl } = req;
+  const { nextUrl, cookies } = req;
   const { pathname } = nextUrl;
-
-  const pathnameHasLocale = locales.some(
+  const cookieLocale = cookies.get("NEXT_LOCALE")?.value || null;
+  const pathnameLocale = locales.find(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );
 
-  if (pathnameHasLocale) return;
+  if (pathnameLocale) {
+    if (pathname === cookieLocale) return;
+    const response = NextResponse.next();
+    response.cookies.set("NEXT_LOCALE", pathnameLocale);
+    return response;
+  }
 
-  const locale = getRequestLocale(req.headers);
+  const locale = getRequestLocale(cookieLocale, req.headers);
   nextUrl.pathname = `/${locale}${pathname}`;
-  return NextResponse.redirect(nextUrl);
+  const response = NextResponse.redirect(nextUrl);
+  if (!cookies.has("NEXT_LOCALE")) {
+    response.cookies.set("NEXT_LOCALE", locale);
+  }
+
+  console.log("middleware", nextUrl);
+  return response;
 });
 
-function getRequestLocale(requestHeaders: Headers): string {
+function getRequestLocale(
+  cookieLocale: string | null,
+  requestHeaders: Headers
+): string {
   const langHeader = requestHeaders.get("accept-language") || undefined;
   const languages = new Negotiator({
-    headers: { "accept-language": langHeader },
+    headers: { "accept-language": cookieLocale || langHeader },
   }).languages(locales.slice());
 
   const activeLocale = languages[0] || locales[0] || "en";
