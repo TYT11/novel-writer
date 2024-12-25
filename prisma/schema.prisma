@@ -73,8 +73,8 @@ model Novel {
 
 model Chapter {
   id          String   @id @default(cuid())
-  title       String
-  content     String
+  title       String?
+  content     Bytes?
   projectId   String
   novel     Novel @relation(fields: [projectId], references: [id])
   collaborations Collaboration[] // Collaboration can be on specific chapters
